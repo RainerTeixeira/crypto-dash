@@ -26,12 +26,21 @@ app = FastAPI(
 
 # Configuração do CORS (Cross-Origin Resource Sharing)
 # Permite que a API seja acessada a partir de diferentes origens (domínios)
+origins = [
+    "https://rainersoft.com.br",
+    "https://www.rainersoft.com.br",
+    "http://localhost:3000",
+    "http://localhost:8000",
+]
+
 app.add_middleware(
     CORS,
-    allow_origins=["*"],  # Em produção, substituir por domínios específicos
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Permite todos os métodos HTTP (GET, POST, etc.)
-    allow_headers=["*"],  # Permite todos os cabeçalhos
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Length", "X-Foo", "X-Bar"],
+    max_age=600,  # Tempo em segundos que o navegador pode armazenar a resposta de preflight
 )
 
 # Modelos Pydantic para validação e documentação dos dados

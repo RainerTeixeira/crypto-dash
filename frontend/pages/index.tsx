@@ -12,41 +12,16 @@ import { useEffect, useState } from 'react';  // Hooks do React
 import Head from 'next/head';  // Componente para gerenciar o cabeçalho da página
 import { FiArrowUp, FiArrowDown, FiRefreshCw } from 'react-icons/fi';  // Ícones da Feather Icons
 
-// Definição dos tipos TypeScript para tipagem estática
-
-/**
- * Interface que define a estrutura de dados de uma criptomoeda
- */
-type Criptomoeda = {
-  id: number;              // Identificador único
-  name: string;            // Nome da criptomoeda (ex: "Bitcoin")
-  symbol: string;          // Símbolo (ex: "btc")
-  price: number;           // Preço atual em USD
-  change_24h: number;      // Variação percentual nas últimas 24h
-  market_cap: number;      // Capitalização de mercado
-  volume_24h: number;      // Volume de negociação nas últimas 24h
-  last_updated: string;    // Data/hora da última atualização
-};
-
-/**
- * Interface que define a estrutura das estatísticas do mercado
- */
-type Estatisticas = {
-  total_criptomoedas: number;    // Número total de criptomoedas
-  volume_24h: number;           // Volume total de negociação nas últimas 24h
-  capitalizacao_mercado: number; // Capitalização total de mercado
-  dominancia_btc: number;        // Porcentagem de dominância do Bitcoin
-  dominancia_eth: number;        // Porcentagem de dominância do Ethereum
-  atualizado_em: string;         // Data/hora da última atualização
-};
+// Import types from crypto.types.ts
+import { Cryptocurrency, MarketStats } from '../src/types/crypto.types';
 
 /**
  * Componente principal da página inicial
  */
 export default function Home() {
-  // Estados do componente
-  const [dados, setDados] = useState<Criptomoeda[]>([]);           // Lista de criptomoedas
-  const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null);  // Estatísticas do mercado
+  // Component states
+  const [cryptos, setCryptos] = useState<Cryptocurrency[]>([]);    // List of cryptocurrencies
+  const [marketStats, setMarketStats] = useState<MarketStats | null>(null);  // Market statistics
   const [carregando, setCarregando] = useState(true);              // Estado de carregamento
   const [erro, setErro] = useState<string | null>(null);           // Mensagem de erro, se houver
   const [atualizando, setAtualizando] = useState(false);           // Estado de atualização manual
@@ -60,10 +35,10 @@ export default function Home() {
       setAtualizando(true);
       setErro(null);
       
-      // Faz requisições paralelas para melhorar o desempenho
+      // Make parallel requests to improve performance
       const [resCripto, resEstatisticas] = await Promise.all([
-        fetch('/api/criptomoedas'),
-        fetch('/api/estatisticas')
+        fetch('/api/cryptocurrencies'),
+        fetch('/api/market-stats')
       ]);
       
       // Verifica se as requisições foram bem-sucedidas
@@ -75,28 +50,27 @@ export default function Home() {
       const dadosCripto = await resCripto.json();
       const dadosEstatisticas = await resEstatisticas.json();
       
-      // Atualiza os estados com os dados recebidos
-      setDados(dadosCripto);
-      setEstatisticas(dadosEstatisticas);
+      // Update states with the received data
+      setCryptos(dadosCripto);
+      setMarketStats(dadosEstatisticas);
     } catch (err) {
       // Em caso de erro, armazena a mensagem de erro
       setErro(err instanceof Error ? err.message : 'Ocorreu um erro inesperado');
     } finally {
       // Independente do resultado, finaliza os estados de carregamento
       setCarregando(false);
-      setAtualizando(false);
     }
   };
 
   // Efeito colateral que executa ao montar o componente
   useEffect(() => {
-    // Busca os dados iniciais
+    // Fetch initial data
     buscarDados();
-    
-    // Configura um intervalo para atualizar os dados a cada minuto
+  
+    // Set up an interval to update data every minute
     const intervalo = setInterval(buscarDados, 60000);
-    
-    // Função de limpeza que é executada quando o componente é desmontado
+  
+    // Cleanup function that runs when the component unmounts
     return () => clearInterval(intervalo);
   }, []); // Array de dependências vazio = executa apenas uma vez ao montar
 
@@ -123,150 +97,171 @@ export default function Home() {
     }).format(valor);
   };
 
-  // Estado de carregamento
+  // Check if data is loading
   if (carregando) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          {/* Ícone de carregamento animado */}
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando dados de criptomoedas...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       </div>
     );
   }
 
-  // Estado de erro
+  // If there's an error, show the error message
   if (erro) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-        <div className="text-center max-w-md">
-          <div className="text-red-500 text-5xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Erro ao carregar os dados</h2>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Error loading data</h1>
           <p className="text-gray-600 mb-6">{erro}</p>
           <button
             onClick={buscarDados}
-            disabled={atualizando}
-            className={`px-4 py-2 rounded-md text-white ${atualizando ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} transition-colors`}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            {atualizando ? 'Atualizando...' : 'Tentar novamente'}
+            Try again
           </button>
         </div>
       </div>
     );
   }
 
-  // Renderização principal
+  // Main render
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Cabeçalho da página */}
+      {/* Page header */}
       <Head>
-        <title>Dashboard de Criptomoedas</title>
-        <meta name="description" content="Acompanhe as cotações das principais criptomoedas em tempo real" />
+        <title>Crypto Dashboard</title>
+        <meta name="description" content="Track real-time cryptocurrency prices and market data" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* Barra de navegação */}
+      {/* Navigation bar */}
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">CryptoDash</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Crypto Dashboard</h1>
           <button
             onClick={buscarDados}
             disabled={atualizando}
-            className="flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors"
-            aria-label="Atualizar dados"
+            className={`flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors`}
+            aria-label="Refresh data"
           >
             <FiRefreshCw className={`mr-2 ${atualizando ? 'animate-spin' : ''}`} />
-            {atualizando ? 'Atualizando...' : 'Atualizar'}
+            {atualizando ? 'Updating...' : 'Refresh'}
           </button>
         </div>
       </header>
 
-      {/* Conteúdo principal */}
+      {/* Main content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Seção de Estatísticas */}
-        {estatisticas && (
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Crypto Dashboard</h1>
+          <button
+            onClick={buscarDados}
+            disabled={atualizando}
+            className={`flex items-center px-4 py-2 rounded-md ${atualizando ? 'bg-gray-300' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+          >
+            {atualizando ? (
+              <>
+                <FiRefreshCw className="animate-spin mr-2" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <FiRefreshCw className="mr-2" />
+                Refresh
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Display error message if any */}
+        {erro && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+            <p className="font-bold">Error</p>
+            <p>{erro}</p>
+          </div>
+        )}
+
+        {/* Market Stats Section */}
+        {marketStats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {/* Cartão de Capitalização de Mercado */}
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow">
-              <p className="text-sm text-gray-500">Capitalização de Mercado</p>
-              <p className="text-xl font-semibold">${formatarNumero(estatisticas.capitalizacao_mercado)}</p>
+            <div className="bg-white p-4 rounded-lg shadow">
+              <p className="text-sm text-gray-500">Total Cryptocurrencies</p>
+              <p className="text-2xl font-bold">{marketStats.total_cryptocurrencies.toLocaleString()}</p>
             </div>
-            
-            {/* Cartão de Volume 24h */}
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow">
-              <p className="text-sm text-gray-500">Volume 24h</p>
-              <p className="text-xl font-semibold">${formatarNumero(estatisticas.volume_24h)}</p>
+            <div className="bg-white p-4 rounded-lg shadow">
+              <p className="text-sm text-gray-500">24h Volume</p>
+              <p className="text-2xl font-bold">${(marketStats.volume_24h / 1e9).toFixed(2)}B</p>
             </div>
-            
-            {/* Cartão de Dominância do Bitcoin */}
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow">
-              <p className="text-sm text-gray-500">Dom. BTC</p>
-              <p className="text-xl font-semibold">{estatisticas.dominancia_btc.toFixed(1)}%</p>
+            <div className="bg-white p-4 rounded-lg shadow">
+              <p className="text-sm text-gray-500">Market Cap</p>
+              <p className="text-2xl font-bold">${(marketStats.market_cap / 1e12).toFixed(2)}T</p>
             </div>
-            
-            {/* Cartão de Dominância do Ethereum */}
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow">
-              <p className="text-sm text-gray-500">Dom. ETH</p>
-              <p className="text-xl font-semibold">{estatisticas.dominancia_eth.toFixed(1)}%</p>
+            <div className="bg-white p-4 rounded-lg shadow">
+              <p className="text-sm text-gray-500">BTC/ETH Dominance</p>
+              <p className="text-2xl font-bold">
+                {marketStats.btc_dominance.toFixed(1)}% / {marketStats.eth_dominance.toFixed(1)}%
+              </p>
             </div>
           </div>
         )}
 
-        {/* Tabela de Criptomoedas */}
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        {/* Cryptocurrencies Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criptomoeda</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Preço (USD)</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Variação 24h</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Volume 24h</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor de Mercado</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    24h %
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    24h Volume
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Market Cap
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {dados.map((cripto) => (
-                  <tr key={cripto.id} className="hover:bg-gray-50 transition-colors">
-                    {/* Coluna do nome e símbolo */}
+                {cryptos.map((crypto) => (
+                  <tr key={crypto.id} className="hover:bg-gray-50 cursor-pointer">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold">
-                          {cripto.symbol.substring(0, 3).toUpperCase()}
+                        <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 font-bold">
+                          {crypto.symbol.substring(0, 3).toUpperCase()}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{cripto.name}</div>
-                          <div className="text-sm text-gray-500">{cripto.symbol.toUpperCase()}</div>
+                          <div className="text-sm font-medium text-gray-900">{crypto.name}</div>
+                          <div className="text-sm text-gray-500">{crypto.symbol.toUpperCase()}</div>
                         </div>
                       </div>
                     </td>
-                    
-                    {/* Coluna do preço */}
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                      {formatarMoeda(cripto.price)}
+                      ${crypto.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
                     </td>
-                    
-                    {/* Coluna da variação 24h */}
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <span className={`inline-flex items-center ${cripto.change_24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {cripto.change_24h >= 0 ? (
+                    <td className={`px-6 py-4 whitespace-nowrap text-right text-sm ${crypto.change_24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className="flex items-center justify-end">
+                        {crypto.change_24h >= 0 ? (
                           <FiArrowUp className="mr-1" />
                         ) : (
                           <FiArrowDown className="mr-1" />
                         )}
-                        {Math.abs(cripto.change_24h).toFixed(2)}%
-                      </span>
+                        {Math.abs(crypto.change_24h).toFixed(2)}%
+                      </div>
                     </td>
-                    
-                    {/* Coluna do volume 24h */}
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                      ${formatarNumero(cripto.volume_24h)}
+                      ${(crypto.volume_24h / 1e6).toFixed(2)}M
                     </td>
-                    
-                    {/* Coluna da capitalização de mercado */}
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                      ${formatarNumero(cripto.market_cap)}
+                      ${(crypto.market_cap / 1e9).toFixed(2)}B
                     </td>
                   </tr>
                 ))}
@@ -276,15 +271,10 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Rodapé */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="container mx-auto px-4 py-6">
-          <p className="text-center text-sm text-gray-500">
-            Dados atualizados em {new Date().toLocaleString('pt-BR')}
-          </p>
-          <p className="text-center text-xs text-gray-400 mt-2">
-            Os dados são fornecidos pela CoinGecko API e atualizados a cada minuto.
-          </p>
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 py-4">
+        <div className="container mx-auto px-4 text-center text-sm text-gray-500">
+          <p>Real-time data. Auto-updates every minute.</p>
         </div>
       </footer>
     </div>

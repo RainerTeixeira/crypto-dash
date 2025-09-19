@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/crypto-dash/(.*)", "destination": "/crypto-dash/_next/static/$1" },
+    { "source": "/crypto-dash/_next/data/:path*", "destination": "/crypto-dash/_next/data/:path*" },
+    { "source": "/crypto-dash/((?!api/).*)", "destination": "/crypto-dash" }
+  ],
+  "public": true,
+  "cleanUrls": true,
+  "trailingSlash": false
+}
