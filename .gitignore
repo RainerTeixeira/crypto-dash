@@ -1,0 +1,196 @@
+# Dependências
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.python-version
+
+# Variáveis de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Próximo.js
+.next/
+out/
+build/
+
+# Produção
+.DS_Store
+*.pem
+
+# Depuração
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Supabase
+supabase/
+.supabase/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Python
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Arquivos de configuração local
+*.local
+
+# Arquivos de cache
+.cache/
+.vercel/
+
+# Arquivos de ambiente de desenvolvimento
+.env.development
+.env.test
+.env.production
+
+# Arquivos de IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Arquivos de log
+logs
+*.log
+
+# Arquivos temporários
+.temp/
+tmp/
+
+# Arquivos de cobertura de testes
+coverage/
+.nyc_output/
+
+# Arquivos do Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Arquivos do macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Arquivos do Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Arquivos do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes virtuais
+venv/
+ENV/
+
+# Distribuição / empacotamento
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Arquivos de banco de dados SQLite
+*.sqlite
+
+# Arquivos de configuração do Supabase
+supabase/config.toml
+supabase/.temp/
+
+# Arquivos de migração temporários
+supabase/migrations/*.sql
+!supabase/migrations/*.up.sql
+!supabase/migrations/*.down.sql
+
+# Arquivos de cache do Next.js
+.next/
+
+# Arquivos de build do Next.js
+out/
+
+# Arquivos de ambiente
+.env*.local
+
+# Arquivos de log
+error.log
+
+# Arquivos de cache do npm
+.npm
+
+# Arquivos de cache do Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Arquivos de configuração local
+local.settings.json
+
+# Arquivos de configuração do VS Code
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
