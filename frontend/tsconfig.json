@@ -1,24 +1,85 @@
 {
+  // Configurações do compilador TypeScript
   "compilerOptions": {
+    // Versão do JavaScript de saída (compatível com navegadores antigos)
     "target": "es5",
+    
+    // Bibliotecas incluídas (APIs do navegador e recursos modernos do JavaScript)
     "lib": ["dom", "dom.iterable", "esnext"],
+    
+    // Permite a importação de arquivos JavaScript
     "allowJs": true,
+    
+    // Acelera a compilação pulando a verificação de tipos em bibliotecas
     "skipLibCheck": true,
+    
+    // Habilita verificações rigorosas de tipo para melhor qualidade do código
     "strict": true,
+    // Garante consistência no uso de maiúsculas/minúsculas nos nomes de arquivos
     "forceConsistentCasingInFileNames": true,
+    
+    // O Next.js usa Babel/SWC para compilação, então não precisamos que o TypeScript gere arquivos
     "noEmit": true,
+    // Permite a sintaxe de import/export moderna
     "esModuleInterop": true,
+    
+    // Usa o sistema de módulos ES mais recente
     "module": "esnext",
+    
+    // Estratégia de resolução de módulos do Node.js
+    // para projetos que usam `node_modules`.
     "moduleResolution": "node",
+    // Permite importar arquivos JSON diretamente
     "resolveJsonModule": true,
+    
+    // Garante que cada arquivo possa ser compilado separadamente
     "isolatedModules": true,
+    
+    // Configuração para arquivos JSX (React)
+    // 'preserve' significa que o JSX será mantido como está, e o Next.js (ou Babel/SWC)
+    // fará a transpilação final para JavaScript.
     "jsx": "preserve",
+    // `incremental` permite que o TypeScript salve informações sobre o grafo de módulos
+    // do projeto em um arquivo (`.tsbuildinfo`). Isso acelera compilações subsequentes.
     "incremental": true,
+    // `baseUrl` define o diretório base para resolver módulos não relativos.
+    // '.' significa o diretório raiz do projeto, permitindo importações absolutas.
     "baseUrl": ".",
+    // `paths` permite mapear importações para diretórios específicos.
+    // Isso é usado para criar aliases de importação (ex: `@/components` em vez de `../../components`).
+    // `"@/*": ["./src/*"]` significa que qualquer importação que comece com `@/` será resolvida
+    // a partir do diretório `./src/`.
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    // `typeRoots` especifica os diretórios a serem incluídos na busca por arquivos de declaração de tipos.
+    // Além dos tipos de `node_modules/@types`, também inclui `./src/types` para tipos customizados.
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    // `plugins` permite estender o comportamento do compilador TypeScript.
+    // Neste caso, o plugin 'next' é usado para integração com o Next.js.
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  // `include` especifica um array de padrões de globs para incluir arquivos no programa TypeScript.
+  // Isso diz ao compilador quais arquivos devem ser verificados e compilados.
+  "include": [
+    "**/*.ts", // Inclui todos os arquivos .ts
+    "**/*.tsx", // Inclui todos os arquivos .tsx (TypeScript React)
+    "next-env.d.ts", // O arquivo de declaração de ambiente gerado pelo Next.js
+    "src/types/**/*.d.ts", // Inclui arquivos de declaração de tipo customizados em src/types
+    ".next/types/**/*.ts" // Inclui tipos gerados pelo Next.js
+  ],
+  // `exclude` especifica um array de padrões de globs para excluir arquivos do programa TypeScript.
+  // Arquivos em `node_modules` são tipicamente excluídos, pois são dependências de terceiros.
+  "exclude": [
+    "node_modules"
+  ]
 }

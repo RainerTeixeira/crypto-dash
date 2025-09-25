@@ -1,52 +1,34 @@
-/**
- * Formats a numeric value as currency (USD)
- */
-export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(value: number, currency: string = 'USD'): string {
+  return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency: 'USD',
+    currency,
     minimumFractionDigits: 2,
-    maximumFractionDigits: value < 1 ? 8 : 2
+    maximumFractionDigits: 8,
   }).format(value);
 }
 
-/**
- * Formats a large number in compact format (e.g., 1.5M, 2.3B)
- */
-export function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-US', {
-    notation: 'compact',
-    compactDisplay: 'short',
-    maximumFractionDigits: 1
-  }).format(value);
-}
-
-/**
- * Formats a percentage
- */
 export function formatPercentage(value: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('pt-BR', {
     style: 'percent',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value / 100);
+    maximumFractionDigits: 2,
+    signDisplay: 'exceptZero',
+  }).format(value);
 }
 
-/**
- * Formats a date for display
- */
-export function formatDate(date: string): string {
-  return new Date(date).toLocaleString('en-US', {
-    day: '2-digit',
-    month: 'short',
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat('pt-BR').format(value);
+}
+
+export function formatDate(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return new Intl.DateTimeFormat('pt-BR', {
     year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
-  });
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(d);
 }
-
-// Deprecated: Kept for backward compatibility
-export const formatarMoeda = formatCurrency;
-export const formatarNumero = formatNumber;
-export const formatarPorcentagem = formatPercentage;
-export const formatarData = formatDate;

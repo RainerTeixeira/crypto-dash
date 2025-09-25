@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crypto-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379/0
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY}
+      - RENDER_EXTERNAL_URL=${RENDER_EXTERNAL_URL}
+      - PORT=8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    networks:
+      - crypto-network
+    volumes:
+      - ./backend:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: crypto-redis
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD:-your_redis_password}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - crypto-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Serviço para atualizar os dados das criptomoedas periodicamente
+  updater:
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile.updater
+    container_name: crypto-updater
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379/0
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY}
+      - RENDER_EXTERNAL_URL=${RENDER_EXTERNAL_URL}
+      - UPDATE_INTERVAL=300  # Atualiza a cada 5 minutos
+    command: python -m scripts.update_data
+    depends_on:
+      - redis
+      - api
+    networks:
+      - crypto-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crypto-frontend
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+      - NEXT_PUBLIC_COINGECKO_API_KEY=${NEXT_PUBLIC_COINGECKO_API_KEY}
+      - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
+      - RENDER_EXTERNAL_URL=${RENDER_EXTERNAL_URL}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - crypto-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+networks:
+  crypto-network:
+    driver: bridge
+
+volumes:
+  redis_data:
